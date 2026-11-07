@@ -42,9 +42,15 @@ export default function useWebSocket({
         const connect = () => {
             if (!isActive || manuallyClosed) return;
 
-            const wsUrl =
-                process.env.NEXT_PUBLIC_WS_URL ||
-                "ws://127.0.0.1:8000/ws";
+            // Use the configured backend address.
+            const apiUrl =
+                process.env.NEXT_PUBLIC_API_URL ||
+                "http://127.0.0.1:8000";
+
+            // Convert HTTP/HTTPS into WS/WSS.
+            const wsUrl = process.env.NEXT_PUBLIC_WS_URL
+                ? process.env.NEXT_PUBLIC_WS_URL.replace(/\/+$/, "")
+                : `${apiUrl.replace(/\/+$/, "").replace(/^http/, "ws")}/ws`;
 
             const socket = new WebSocket(
                 `${wsUrl}?token=${encodeURIComponent(token)}`
