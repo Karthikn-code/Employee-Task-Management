@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/api";
 import AdminSidebar from "@/components/AdminSidebar";
@@ -24,7 +24,7 @@ interface Task {
   due_date?: string;
 }
 
-export default function EmployeeDetailsPage() {
+function EmployeeDetailsContent() {
   const router = useRouter();
   const params = useParams();
 
@@ -37,8 +37,8 @@ export default function EmployeeDetailsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    const role = localStorage.getItem("role");
+    const token = sessionStorage.getItem("access_token");
+    const role = sessionStorage.getItem("role");
 
     if (!token || role !== "admin") {
       router.replace("/login");
@@ -86,8 +86,8 @@ export default function EmployeeDetailsPage() {
         console.error("Employee details error:", err);
 
         if (err.response?.status === 401 || err.response?.status === 403) {
-          localStorage.removeItem("access_token");
-          localStorage.removeItem("role");
+          sessionStorage.removeItem("access_token");
+          sessionStorage.removeItem("role");
           router.replace("/login");
           return;
         }
@@ -105,8 +105,8 @@ export default function EmployeeDetailsPage() {
   }, [employeeId, router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("role");
+    sessionStorage.removeItem("access_token");
+    sessionStorage.removeItem("role");
     router.replace("/login");
   };
 
@@ -150,7 +150,6 @@ export default function EmployeeDetailsPage() {
 
       <main className="min-h-screen bg-slate-50 px-4 pb-10 pt-20 sm:px-6 lg:ml-64 lg:px-8 lg:pt-10">
         <div className="mx-auto max-w-7xl">
-
           <button
             onClick={() => router.push("/admin/employees")}
             className="mb-6 text-sm font-semibold text-blue-600 hover:text-blue-800"
@@ -278,6 +277,7 @@ export default function EmployeeDetailsPage() {
                               <p className="font-semibold text-slate-800">
                                 {task.title}
                               </p>
+
                               {task.description && (
                                 <p className="mt-1 max-w-sm truncate text-xs text-slate-500">
                                   {task.description}
@@ -318,5 +318,19 @@ export default function EmployeeDetailsPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function EmployeeDetailsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50 text-slate-500">
+          Loading employee details...
+        </div>
+      }
+    >
+      <EmployeeDetailsContent />
+    </Suspense>
   );
 }

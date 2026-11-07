@@ -422,10 +422,11 @@ export default function AdminDashboard() {
       );
 
       setTasks((previousTasks) => [
-        response.data,
-        ...previousTasks,
-      ]);
-
+  response.data,
+  ...previousTasks.filter(
+    (task) => task.id !== response.data.id
+  ),
+]);
       // Reset filters so the new task is visible.
       setFilteredTasks(null);
       setSearch("");

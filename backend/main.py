@@ -1,3 +1,4 @@
+import os
 
 from fastapi import (
     FastAPI,
@@ -53,11 +54,17 @@ app = FastAPI(
 # CORS CONFIGURATION
 # --------------------------------------------------
 
+allowed_origins = os.getenv(
+    "FRONTEND_ORIGINS",
+    "http://localhost:3000,http://100.64.0.158:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000",
-        "http://100.64.0.158:3000"
+        origin.strip()
+        for origin in allowed_origins
+        if origin.strip()
     ],
     allow_credentials=True,
     allow_methods=["*"],
